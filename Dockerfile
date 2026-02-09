@@ -1,15 +1,22 @@
-FROM php:8.1-apache
+FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y \
     sqlite3 \
     libsqlite3-dev \
-    && docker-php-ext-install pdo pdo_sqlite
+    curl \
+    ca-certificates \
+    && docker-php-ext-install pdo pdo_sqlite \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
 COPY . .
 
-RUN chown -R www-data:www-data /var/www/html
+# Ensure data and log directories exist and are writable by the webserver user
+RUN mkdir -p /var/www/html/data \
+    && mkdir -p /var/www/html/backend/config \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/data /var/www/html/data/* || true
 
 EXPOSE 80
