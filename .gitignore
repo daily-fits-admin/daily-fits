@@ -1,11 +1,11 @@
 # Ignore environment configuration
-.env
+#.env
 
 # Ignore database files
-data/*.db
-data/*.db-journal
-data/*.db-shm
-data/*.db-wal
+#data/*.db
+#data/*.db-journal
+#data/*.db-shm
+#data/*.db-wal
 
 # Ignore log files
 data/*.log
