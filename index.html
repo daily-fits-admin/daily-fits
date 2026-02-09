@@ -310,7 +310,7 @@
                         this.loadAvailableMonths()
                     ]);
                     
-                    // Initialize Tabulator
+                    // Initialize Tabulator with daily columns (rank will display 1-based)
                     this.table = new Tabulator("#leaderboard-table", {
                         layout: "fitColumns",
                         height: "600px",
@@ -320,31 +320,50 @@
                                 title: "Rank",
                                 field: "position",
                                 width: 80,
-                                formatter: (cell) => {/* Lines 324-330 omitted */}
+                                formatter: (cell) => {
+                                    const v = cell.getValue();
+                                    const idx = (typeof v === 'number') ? (v + 1) : (Number(v) ? Number(v) + 1 : v);
+                                    if (idx === 1) return `🥇 ${idx}`;
+                                    if (idx === 2) return `🥈 ${idx}`;
+                                    if (idx === 3) return `🥉 ${idx}`;
+                                    return idx;
+                                }
                             },
                             {
                                 title: "Player",
                                 field: "display_name",
                                 headerFilter: "input",
-                                formatter: (cell) => {/* Lines 337-339 omitted */}
+                                formatter: (cell) => {
+                                    return cell.getValue() || '';
+                                }
                             },
                             {
                                 title: "Score",
                                 field: "score",
                                 sorter: "number",
-                                formatter: (cell) => {/* Lines 346-347 omitted */}
+                                formatter: (cell) => {
+                                    const v = Number(cell.getValue());
+                                    return Number.isFinite(v) ? v.toLocaleString() : '';
+                                }
                             },
                             {
                                 title: "Platform",
                                 field: "platform",
                                 width: 120,
-                                formatter: (cell) => {/* Lines 354-361 omitted */}
+                                formatter: (cell) => {
+                                    return cell.getValue() || '';
+                                }
                             },
                             {
                                 title: "First Seen",
                                 field: "first_seen",
                                 width: 120,
-                                formatter: (cell) => {/* Lines 368-369 omitted */}
+                                formatter: (cell) => {
+                                    const v = cell.getValue();
+                                    if (!v) return '';
+                                    const d = new Date(v);
+                                    return isNaN(d) ? v : d.toLocaleDateString();
+                                }
                             }
                         ]
                     });
@@ -375,6 +394,15 @@
                         console.log('Data received:', data);
                         
                         if (data.success) {
+                            // Ensure daily columns are set (restore daily view columns)
+                            this.table.setColumns([
+                                { title: "Rank", field: "position", width: 80, formatter: (cell) => { const v = cell.getValue(); const idx = (typeof v === 'number') ? (v+1) : (Number(v)?Number(v)+1:v); if (idx===1) return `🥇 ${idx}`; if (idx===2) return `🥈 ${idx}`; if (idx===3) return `🥉 ${idx}`; return idx; } },
+                                { title: "Player", field: "display_name", headerFilter: "input", formatter: (cell) => (cell.getValue()||'') },
+                                { title: "Score", field: "score", sorter: "number", formatter: (cell) => { const v = Number(cell.getValue()); return Number.isFinite(v)?v.toLocaleString():'' } },
+                                { title: "Platform", field: "platform", width: 120, formatter: (cell) => (cell.getValue()||'') },
+                                { title: "First Seen", field: "first_seen", width: 120, formatter: (cell) => { const v = cell.getValue(); if(!v) return ''; const d = new Date(v); return isNaN(d)?v:d.toLocaleDateString(); } }
+                            ]);
+
                             this.table.setData(data.data);
                             this.status = `Loaded ${data.data.length} entries for ${data.meta.date}`;
                             this.statusType = 'success';

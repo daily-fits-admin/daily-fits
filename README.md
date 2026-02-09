@@ -53,7 +53,7 @@ An open-source community tool for collecting, storing, and analyzing daily leade
 
 **Repository:** https://github.com/Hatem-D/daily-fits (private)
 
-**📁 AI Context Files:** See [.lltm-tools/PROJECT_BRIEF.md](.lltm-tools/PROJECT_BRIEF.md) for comprehensive technical documentation and setup details.
+**Documentation:** See `PROJECT_BRIEF.md` for comprehensive technical documentation and setup details.
 
 ---
 
@@ -465,25 +465,6 @@ SOFTWARE.
 - *Fights in Tight Spaces* by Ground Shatter
 - PlayFab API by Microsoft
 - Community contributors and testers
-
----
-
-## 📊 Roadmap
-
-### Planned Features
-- [ ] Web dashboard for data visualization
-- [ ] Player profile pages with detailed statistics
-- [ ] Score trend analysis and predictions
-- [ ] Automated daily fetching (cron job setup)
-- [ ] Multi-game support
-- [ ] Discord bot integration for leaderboard updates
-- [ ] REST API for external integrations
-
-### Future Enhancements
-- [ ] Performance optimizations for large datasets
-- [ ] Advanced analytics (score distributions, player clusters)
-- [ ] Export to other formats (Excel, PDF reports)
-- [ ] Backup and restore utilities
 
 ---
 
