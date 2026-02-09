@@ -1,0 +1,54 @@
+# Ignore environment configuration
+.env
+
+# Ignore database files
+data/*.db
+data/*.db-journal
+data/*.db-shm
+data/*.db-wal
+
+# Ignore log files
+data/*.log
+
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+analytics/scripts/__pycache__/
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore export files
+analytics/scripts/export_*.csv
+analytics/scripts/export_*.json
+*.csv
+*.json
+
+# Ignore composer/vendor (if used in future)
+vendor/
+composer.lock
+
+# Ignore Python virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.backup
+
+# Ignore local tools files
+.tools*/

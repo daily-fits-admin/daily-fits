@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fights in Tight Spaces - Daily Leaderboard</title>
+    
+    <!-- Tabulator CSS -->
+    <link href="https://unpkg.com/tabulator-tables@5.5/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        header p {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+        
+        .controls {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .controls label {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .controls input[type="date"],
+        .controls select {
+            padding: 8px 12px;
+            border: 1px solid #444;
+            background: #2d2d44;
+            color: #fff;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        .controls button {
+            padding: 8px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .controls button:hover {
+            background: #45a049;
+        }
+        
+        .controls button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tabs button {
+            flex: 1;
+            min-width: 140px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #aaa;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tabs button:hover {
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+        }
+        
+        .tabs button.active {
+            background: #4CAF50;
+            color: #fff;
+        }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-left: auto;
+        }
+        
+        .status.loading {
+            background: #ff9800;
+            color: #000;
+        }
+        
+        .status.success {
+            background: #4CAF50;
+        }
+        
+        .status.error {
+            background: #f44336;
+        }
+        
+        #leaderboard-table {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .tabulator {
+            background: transparent;
+            border: none;
+        }
+        
+        .tabulator .tabulator-header {
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 2px solid #4CAF50;
+        }
+        
+        .tabulator .tabulator-header .tabulator-col {
+            background: transparent;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" x-data="leaderboardApp()">
+        <header>
+            <h1>🥊 Fights in Tight Spaces</h1>
+            <p>Daily Challenge Leaderboard</p>
+        </header>
+        
+        <div class="tabs">
+            <button @click="viewMode = 'daily'" :class="{'active': viewMode === 'daily'}">
+                📅 Daily
+            </button>
+            <button @click="viewMode = 'weekly'; loadWeekly()" :class="{'active': viewMode === 'weekly'}">
+                📊 Weekly
+            </button>
+            <button @click="viewMode = 'monthly'; loadMonthly()" :class="{'active': viewMode === 'monthly'}">
+                📆 Monthly
+            </button>
+            <button @click="viewMode = 'alltime'; loadAllTime()" :class="{'active': viewMode === 'alltime'}">
+                🏆 All-Time
+            </button>
+        </div>
+        
+        <div class="controls" x-show="viewMode === 'daily'">
+            <div>
+                <label for="date-select">Date:</label>
+                <input type="date" 
+                       id="date-select" 
+                       x-model="selectedDate"
+                       :max="today">
+            </div>
+            
+            <button @click="loadLeaderboard()" :disabled="loading">
+                <span x-show="!loading">Load Leaderboard</span>
+                <span x-show="loading">Loading...</span>
+            </button>
+            
+            <div class="status" 
+                 x-show="status"
+                 :class="statusType"
+                 x-text="status">
+            </div>
+        </div>
+        
+        <div class="controls" x-show="viewMode === 'weekly'">
+            <div>
+                <label for="week-select">Week:</label>
+                <select id="week-select" x-model="selectedWeek" @change="loadWeekly()">
+                    <template x-for="week in availableWeeks" :key="week.week_start">
+                        <option :value="week.week_start" x-text="week.week_start + ' to ' + week.week_end + ' (' + week.player_count + ' players)'"></option>
+                    </template>
+                </select>
+            </div>
+            
+            <button @click="loadWeekly()" :disabled="loading">
+                <span x-show="!loading">Refresh</span>
+                <span x-show="loading">Loading...</span>
+            </button>
+            
+            <div class="status" 
+                 x-show="status"
+                 :class="statusType"
+                 x-text="status">
+            </div>
+        </div>
+        
+        <div class="controls" x-show="viewMode === 'monthly'">
+            <div>
+                <label for="month-select">Month:</label>
+                <select id="month-select" x-model="selectedMonth" @change="loadMonthly()">
+                    <template x-for="month in availableMonths" :key="month.month_start">
+                        <option :value="month.month_start.substring(0, 7)" x-text="formatMonthName(month.month_start) + ' (' + month.player_count + ' players)'"></option>
+                    </template>
+                </select>
+            </div>
+            
+            <button @click="loadMonthly()" :disabled="loading">
+                <span x-show="!loading">Refresh</span>
+                <span x-show="loading">Loading...</span>
+            </button>
+            
+            <div class="status" 
+                 x-show="status"
+                 :class="statusType"
+                 x-text="status">
+            </div>
+        </div>
+        
+        <div class="controls" x-show="viewMode === 'alltime'">
+            <button @click="loadAllTime()" :disabled="loading">
+                <span x-show="!loading">Refresh All-Time Stats</span>
+                <span x-show="loading">Loading...</span>
+            </button>
+            
+            <div class="status" 
+                 x-show="status"
+                 :class="statusType"
+                 x-text="status">
+            </div>
+        </div>
+        
+        <div id="leaderboard-table"></div>
+        
+        <footer>
+            <p>Unofficial community tool • Not affiliated with Ground Shatter</p>
+            <p>Data collected from PlayFab public leaderboards</p>
+        </footer>
+    </div>
+    
+    <!-- Tabulator JS -->
+    <script src="https://unpkg.com/tabulator-tables@5.5/dist/js/tabulator.min.js"></script>
+    
+    <script>
+        function leaderboardApp() {
+            return {
+                viewMode: 'daily',
+                selectedDate: new Date().toISOString().split('T')[0],
+                today: new Date().toISOString().split('T')[0],
+                selectedWeek: '',
+                selectedMonth: '',
+                availableWeeks: [],
+                availableMonths: [],
+                loading: false,
+                status: '',
+                statusType: '',
+                table: null,
+                
+                async init() {
+                    // Load available weeks and months
+                    await Promise.all([
+                        this.loadAvailableWeeks(),
+                        this.loadAvailableMonths()
+                    ]);
+                    
+                    // Initialize Tabulator
+                    this.table = new Tabulator("#leaderboard-table", {
+                        layout: "fitColumns",
+                        height: "600px",
+                        placeholder: "Select a date and click 'Load Leaderboard'",
+                        columns: [
+                            {
+                                title: "Rank",
+                                field: "position",
+                                width: 80,
+                                formatter: (cell) => {/* Lines 324-330 omitted */}
+                            },
+                            {
+                                title: "Player",
+                                field: "display_name",
+                                headerFilter: "input",
+                                formatter: (cell) => {/* Lines 337-339 omitted */}
+                            },
+                            {
+                                title: "Score",
+                                field: "score",
+                                sorter: "number",
+                                formatter: (cell) => {/* Lines 346-347 omitted */}
+                            },
+                            {
+                                title: "Platform",
+                                field: "platform",
+                                width: 120,
+                                formatter: (cell) => {/* Lines 354-361 omitted */}
+                            },
+                            {
+                                title: "First Seen",
+                                field: "first_seen",
+                                width: 120,
+                                formatter: (cell) => {/* Lines 368-369 omitted */}
+                            }
+                        ]
+                    });
+                    
+                    // Auto-load today's leaderboard
+                    this.loadLeaderboard();
+                },
+                
+                async loadLeaderboard() {
+                    this.loading = true;
+                    this.status = 'Loading...';
+                    this.statusType = 'loading';
+                    
+                    console.log('Loading leaderboard for date:', this.selectedDate);
+                    
+                    try {
+                        const url = `frontend/api/leaderboard.php?date=${this.selectedDate}`;
+                        console.log('Fetching:', url);
+                        
+                        const response = await fetch(url);
+                        console.log('Response status:', response.status, response.statusText);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('Data received:', data);
+                        
+                        if (data.success) {
+                            this.table.setData(data.data);
+                            this.status = `Loaded ${data.data.length} entries for ${data.meta.date}`;
+                            this.statusType = 'success';
+                            
+                            // Clear status after 3 seconds
+                            setTimeout(() => {
+                                this.status = '';
+                            }, 3000);
+                        } else {
+                            throw new Error(data.error || 'Failed to load data');
+                        }
+                    } catch (error) {
+                        console.error('Error loading leaderboard:', error);
+                        this.status = 'Error: ' + error.message;
+                        this.statusType = 'error';
+                        this.table.setData([]);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async loadAvailableWeeks() {
+                    try {
+                        const response = await fetch('frontend/api/weekly.php?list=1');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.availableWeeks = data.data;
+                            if (this.availableWeeks.length > 0) {
+                                this.selectedWeek = this.availableWeeks[0].week_start;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading available weeks:', error);
+                    }
+                },
+                
+                async loadAvailableMonths() {
+                    try {
+                        const response = await fetch('frontend/api/monthly.php?list=1');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.availableMonths = data.data;
+                            if (this.availableMonths.length > 0) {
+                                this.selectedMonth = this.availableMonths[0].month_start.substring(0, 7);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading available months:', error);
+                    }
+                },
+                
+                formatMonthName(dateStr) {
+                    const date = new Date(dateStr);
+                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                },
+                
+                async loadWeekly() {
+                    if (!this.selectedWeek) return;
+                    
+                    this.loading = true;
+                    this.status = 'Loading...';
+                    this.statusType = 'loading';
+                    
+                    console.log('Loading weekly leaderboard for:', this.selectedWeek);
+                    
+                    try {
+                        const url = `frontend/api/weekly.php?week=${this.selectedWeek}`;
+                        console.log('Fetching:', url);
+                        
+                        const response = await fetch(url);
+                        console.log('Response status:', response.status, response.statusText);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('Data received:', data);
+                        
+                        if (data.success) {
+                            // Update table columns for weekly view
+                            this.table.setColumns([
+                                {
+                                },
+                                {
+                                },
+                                {
+                                },
+                                {
+                                },
+                                {
+                                },
+                                {
+                                },
+                                {/* Lines 543-555 omitted */}
+                            ]);
+                            
+                            this.table.setData(data.data);
+                            this.status = `Loaded ${data.data.length} players for ${data.meta.week_start} to ${data.meta.week_end}`;
+                            this.statusType = 'success';
+                            
+                            setTimeout(() => {
+                                this.status = '';
+                            }, 3000);
+                        } else {
+                            throw new Error(data.error || 'Failed to load data');
+                        }
+                    } catch (error) {
+                        console.error('Error loading weekly leaderboard:', error);
+                        this.status = 'Error: ' + error.message;
+                        this.statusType = 'error';
+                        this.table.setData([]);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async loadMonthly() {
+                    if (!this.selectedMonth) return;
+                    
+                    this.loading = true;
+                    this.status = 'Loading...';
+                    this.statusType = 'loading';
+                    
+                    console.log('Loading monthly leaderboard for:', this.selectedMonth);
+                    
+                    try {
+                        const url = `frontend/api/monthly.php?month=${this.selectedMonth}`;
+                        console.log('Fetching:', url);
+                        
+                        const response = await fetch(url);
+                        console.log('Response status:', response.status, response.statusText);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('Data received:', data);
+                        
+                        if (data.success) {
+                            // Update table columns for monthly view
+                            this.table.setColumns([
+                                {
+                                },
+                                {
+                                },
+                                {
+                                },
+                                {
+                                },
+                                {
+                                },
+                                {
+                                },
+                            ]);
+                            
+                            this.table.setData(data.data);
+                            this.status = `Loaded ${data.data.length} players for ${data.meta.month_name}`;
+                            this.statusType = 'success';
+                            
+                            setTimeout(() => {
+                                this.status = '';
+                            }, 3000);
+                        } else {
+                            throw new Error(data.error || 'Failed to load data');
+                        }
+                    } catch (error) {
+                        console.error('Error loading monthly leaderboard:', error);
+                        this.status = 'Error: ' + error.message;
+                        this.statusType = 'error';
+                        this.table.setData([]);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async loadAllTime() {
+                    this.loading = true;
+                    this.status = 'Loading...';
+                    this.statusType = 'loading';
+                    
+                    console.log('Loading all-time leaderboard');
+                    
+                    try {
+                        const url = 'frontend/api/alltime.php';
+                        console.log('Fetching:', url);
+                        
+                        const response = await fetch(url);
+                        console.log('Response status:', response.status, response.statusText);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('Data received:', data);
+                        
+                        if (data.success) {
+                            // Update table columns for all-time view
+                            this.table.setColumns([
+                            ]);
+                            
+                            this.table.setData(data.data);
+                            const meta = data.meta;
+                            this.status = `Loaded ${meta.total_players} players (${meta.first_date} to ${meta.last_date})`;
+                            this.statusType = 'success';
+                            
+                            setTimeout(() => {
+                                this.status = '';
+                            }, 4000);
+                        } else {
+                            throw new Error(data.error || 'Failed to load data');
+                        }
+                    } catch (error) {
+                        console.error('Error loading all-time leaderboard:', error);
+                        this.status = 'Error: ' + error.message;
+                        this.statusType = 'error';
+                        this.table.setData([]);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
