@@ -457,19 +457,14 @@
                         if (data.success) {
                             // Update table columns for weekly view
                             this.table.setColumns([
-                                {
-                                },
-                                {
-                                },
-                                {
-                                },
-                                {
-                                },
-                                {
-                                },
-                                {
-                                },
-                                {/* Lines 543-555 omitted */}
+                                { title: "Rank", field: "position", width: 80 },
+                                { title: "Player", field: "display_name", headerFilter: "input" },
+                                { title: "Total Score", field: "total_score", sorter: "number" },
+                                { title: "Days", field: "days_participated", sorter: "number", width: 80 },
+                                { title: "Avg Score", field: "average_score", sorter: "number" },
+                                { title: "Best Daily", field: "best_daily_score", sorter: "number" },
+                                { title: "Best Date", field: "best_daily_date", width: 110 },
+                                { title: "Platform", field: "platform", width: 120 },
                             ]);
                             
                             this.table.setData(data.data);
@@ -518,18 +513,14 @@
                         if (data.success) {
                             // Update table columns for monthly view
                             this.table.setColumns([
-                                {
-                                },
-                                {
-                                },
-                                {
-                                },
-                                {
-                                },
-                                {
-                                },
-                                {
-                                },
+                                { title: "Rank", field: "position", width: 80 },
+                                { title: "Player", field: "display_name", headerFilter: "input" },
+                                { title: "Total Score", field: "total_score", sorter: "number" },
+                                { title: "Days", field: "days_participated", sorter: "number", width: 80 },
+                                { title: "Avg Score", field: "average_score", sorter: "number" },
+                                { title: "Best Daily", field: "best_daily_score", sorter: "number" },
+                                { title: "Best Date", field: "best_daily_date", width: 110 },
+                                { title: "Platform", field: "platform", width: 120 },
                             ]);
                             
                             this.table.setData(data.data);
@@ -576,6 +567,14 @@
                         if (data.success) {
                             // Update table columns for all-time view
                             this.table.setColumns([
+                                { title: "Rank", field: "position", width: 80 },
+                                { title: "Player", field: "display_name", headerFilter: "input" },
+                                { title: "Total Score", field: "total_score", sorter: "number" },
+                                { title: "Days", field: "days_participated", sorter: "number", width: 80 },
+                                { title: "Avg Score", field: "average_score", sorter: "number" },
+                                { title: "Best Daily", field: "best_daily_score", sorter: "number" },
+                                { title: "Best Date", field: "best_daily_date", width: 110 },
+                                { title: "Platform", field: "platform", width: 120 },
                             ]);
                             
                             this.table.setData(data.data);
