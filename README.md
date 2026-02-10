@@ -51,6 +51,14 @@ An open-source community tool for collecting, storing, and analyzing daily leade
 - View dashboard: Open `http://localhost/daily-fits/frontend/` in browser
 - API access: `curl http://localhost/daily-fits/frontend/api/leaderboard.php?date=2026-01-23`
 
+**Deployment Note**
+
+- The `main` branch is deployed as-is to the remote host. The Dockerfile used for deployment copies the repository to `/var/www/html` inside the container.
+- The deployed container expects the database and log files under `/var/www/html/data`. Ensure `.env` on `main` sets:
+    - `DB_PATH=/var/www/html/data/fits.db`
+    - `LOG_PATH=/var/www/html/data/fits.log`
+- If you change the runtime location in the Dockerfile, update `.env` accordingly before pushing.
+
 **Repository:** https://github.com/Hatem-D/daily-fits (private)
 
 **Documentation:** See `PROJECT_BRIEF.md` for comprehensive technical documentation and setup details.
