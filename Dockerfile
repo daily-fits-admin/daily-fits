@@ -10,13 +10,13 @@ RUN apt-get update && apt-get install -y \
 
 RUN a2enmod rewrite
 
-WORKDIR /var/www/html/daily-fits
+WORKDIR /var/www/html
 COPY . .
 
 # Ensure data and log directories exist and are writable by the webserver user
-RUN mkdir -p /var/www/html/daily-fits/data \
-    && mkdir -p /var/www/html/daily-fits/backend/config \
-    && chown -R www-data:www-data /var/www/html/daily-fits \
-    && chmod -R 775 /var/www/html/daily-fits/data /var/www/html/daily-fits/data/* || true
+RUN mkdir -p /var/www/html/data \
+    && mkdir -p /var/www/html/backend/config \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/data /var/www/html/data/* || true
 
 EXPOSE 80
