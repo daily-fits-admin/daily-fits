@@ -147,6 +147,13 @@ class PlayFabClient {
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curlError = curl_error($ch);
+            // Optionally log raw API responses when enabled via env
+            if (getenv('LOG_RAW_API') === '1') {
+                $raw = $response === false ? '' : $response;
+                // Truncate very long responses to avoid huge logs
+                $trunc = is_string($raw) ? mb_substr($raw, 0, 10000) : '';
+                $this->logger->debug('API Raw Response', ['http_code' => $httpCode, 'response_preview' => $trunc]);
+            }
             curl_close($ch);
             
             if ($curlError) {

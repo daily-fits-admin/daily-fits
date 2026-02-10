@@ -184,27 +184,73 @@ class LeaderboardFetcher {
         $platformUserId = null;
         
         foreach ($linkedAccounts as $account) {
-            if (isset($account['Platform']) && strtoupper($account['Platform']) === 'GOG') {
+            $acctPlatform = $account['Platform'] ?? '';
+            $acctUserId = $account['PlatformUserId'] ?? '';
+
+            // Prefer explicit GOG platform
+            if (strtoupper($acctPlatform) === 'GOG') {
                 $platform = 'GOG';
-                $platformUserId = $account['PlatformUserId'] ?? null;
+                $platformUserId = $acctUserId ?: null;
+                break;
+            }
+
+            // Some entries come back as Platform='Custom' but have a prefixed PlatformUserId like "[GOG]..."
+            if (stripos($acctUserId, '[GOG]') !== false) {
+                $platform = 'GOG';
+                // strip the [GOG] prefix if present
+                $platformUserId = trim(str_ireplace('[GOG]', '', $acctUserId));
                 break;
             }
         }
         
         // Fallback to first linked account if GOG not found
         if ($platform === null && !empty($linkedAccounts)) {
-            $platform = $linkedAccounts[0]['Platform'] ?? null;
-            $platformUserId = $linkedAccounts[0]['PlatformUserId'] ?? null;
+            $first = $linkedAccounts[0];
+            $firstPlatform = $first['Platform'] ?? null;
+            $firstUserId = $first['PlatformUserId'] ?? null;
+
+            // Handle Common custom prefixes
+            if ($firstUserId && stripos($firstUserId, '[GOG]') !== false) {
+                $platform = 'GOG';
+                $platformUserId = trim(str_ireplace('[GOG]', '', $firstUserId));
+            } else {
+                $platform = $firstPlatform;
+                $platformUserId = $firstUserId;
+            }
         }
         
+        // Sanitize display name and platform user id to remove control chars
+        $displayNameRaw = $entry['DisplayName'] ?? $profile['DisplayName'] ?? null;
+        $displayName = $this->sanitizeString($displayNameRaw);
+        $platformUserId = $this->sanitizeString($platformUserId);
+
         return [
             'playfab_id' => $entry['PlayFabId'],
-            'display_name' => $entry['DisplayName'] ?? $profile['DisplayName'] ?? null,
+            'display_name' => $displayName,
             'platform' => $platform,
             'platform_user_id' => $platformUserId,
             'first_seen' => date('Y-m-d'),
             'last_seen' => date('Y-m-d')
         ];
+    }
+
+    /**
+     * Sanitize a string by trimming, removing control characters and applying
+     * Unicode normalization (if available).
+     *
+     * @param string|null $s
+     * @return string|null
+     */
+    private function sanitizeString(?string $s): ?string {
+        if ($s === null) return null;
+        $s = trim($s);
+        // Remove C0 control chars and DEL
+        $s = preg_replace('/[\x00-\x1F\x7F]+/u', '', $s);
+        // Apply Unicode normalization (if ext-intl available)
+        if (class_exists('Normalizer')) {
+            $s = Normalizer::normalize($s, Normalizer::FORM_KC);
+        }
+        return $s === '' ? null : $s;
     }
     
     /**
