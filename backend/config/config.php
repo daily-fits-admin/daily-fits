@@ -39,14 +39,27 @@ define('PLAYFAB_SESSION_TOKEN', getenv('PLAYFAB_SESSION_TOKEN') ?: '');
 
 // Database Configuration
 define('DB_TYPE', getenv('DB_TYPE') ?: 'sqlite');
-define('DB_PATH', getenv('DB_PATH') ?: __DIR__ . '/../../data/fits.db');
+
+// Convert relative paths to absolute paths
+$dbPath = getenv('DB_PATH') ?: __DIR__ . '/../../data/fits.db';
+if ($dbPath[0] !== '/') {
+    // Relative path - make it absolute from the repo root
+    $dbPath = __DIR__ . '/../../' . ltrim($dbPath, './');
+}
+define('DB_PATH', $dbPath);
+
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
 define('DB_NAME', getenv('DB_NAME') ?: 'fits_leaderboard');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: '');
 
 // Logging Configuration
-define('LOG_PATH', getenv('LOG_PATH') ?: __DIR__ . '/../../data/fits.log');
+$logPath = getenv('LOG_PATH') ?: __DIR__ . '/../../data/fits.log';
+if ($logPath[0] !== '/') {
+    // Relative path - make it absolute from the repo root
+    $logPath = __DIR__ . '/../../' . ltrim($logPath, './');
+}
+define('LOG_PATH', $logPath);
 define('LOG_LEVEL', getenv('LOG_LEVEL') ?: 'INFO'); // DEBUG, INFO, WARNING, ERROR
 
 // API Configuration
