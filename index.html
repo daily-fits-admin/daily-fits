@@ -292,7 +292,7 @@
         function leaderboardApp() {
             return {
                 viewMode: 'daily',
-                selectedDate: new Date().toISOString().split('T')[0],
+                selectedDate: (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0]; })(),
                 today: new Date().toISOString().split('T')[0],
                 selectedWeek: '',
                 selectedMonth: '',
