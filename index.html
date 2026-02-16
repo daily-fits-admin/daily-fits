@@ -354,17 +354,7 @@
                                     return cell.getValue() || '';
                                 }
                             },
-                            {
-                                title: "First Seen",
-                                field: "first_seen",
-                                width: 120,
-                                formatter: (cell) => {
-                                    const v = cell.getValue();
-                                    if (!v) return '';
-                                    const d = new Date(v);
-                                    return isNaN(d) ? v : d.toLocaleDateString();
-                                }
-                            }
+                            
                         ]
                     });
                     
@@ -400,7 +390,7 @@
                                 { title: "Player", field: "display_name", headerFilter: "input", formatter: (cell) => (cell.getValue()||'') },
                                 { title: "Score", field: "score", sorter: "number", formatter: (cell) => { const v = Number(cell.getValue()); return Number.isFinite(v)?v.toLocaleString():'' } },
                                 { title: "Platform", field: "platform", width: 120, formatter: (cell) => (cell.getValue()||'') },
-                                { title: "First Seen", field: "first_seen", width: 120, formatter: (cell) => { const v = cell.getValue(); if(!v) return ''; const d = new Date(v); return isNaN(d)?v:d.toLocaleDateString(); } }
+                            
                             ]);
 
                             this.table.setData(data.data);
