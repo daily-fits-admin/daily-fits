@@ -141,14 +141,19 @@ class LeaderboardFetcher {
         $playersUpdated = 0;
         $scoresUpdated = 0;
         
-        foreach ($entries as $entry) {
+        foreach ($entries as $idx => $entry) {
+            // Ensure position is deterministic across paginated pages by
+            // computing it from the merged array index instead of trusting
+            // the API-provided Position field which may be relative per page.
+            $entry['Position'] = $idx;
+
             // Extract player data
             $playerData = $this->normalizePlayerData($entry);
             if ($this->db->upsertPlayer($playerData)) {
                 $playersUpdated++;
             }
-            
-            // Extract score data
+
+            // Extract score data (uses the computed Position)
             $scoreData = $this->normalizeScoreData($entry, $statisticName, $statDate);
             if ($this->db->upsertDailyScore($scoreData)) {
                 $scoresUpdated++;
