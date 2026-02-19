@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#1e1f2a"/>
+      <stop offset="1" stop-color="#2d2d44"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="300" fill="url(#g)"/>
+  <g fill="#4CAF50" opacity="0.06">
+    <circle cx="200" cy="120" r="120" />
+    <circle cx="900" cy="80" r="160" />
+  </g>
+  <text x="60" y="200" fill="#ffffff" font-family="Segoe UI, Tahoma, sans-serif" font-size="48">Daily Leaderboards • Fights in Tight Spaces</text>
+</svg>

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fights in Tight Spaces - Daily Leaderboard</title>
     
+    <!-- Bootstrap CSS (lightweight CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ENjdO4Dr2bkBIFxQpeoA6VZbA6Y9VdKZc+3ZxZ9l+Il0h5Vx1KkNf0Wl5y2vI5Vx" crossorigin="anonymous">
+
     <!-- Tabulator CSS -->
     <link href="https://unpkg.com/tabulator-tables@5.5/dist/css/tabulator_midnight.min.css" rel="stylesheet">
     
@@ -176,13 +179,43 @@
             font-size: 0.9em;
         }
     </style>
+
+    <!-- Custom lightweight theme overrides -->
+    <link rel="stylesheet" href="frontend/css/custom.css">
 </head>
 <body>
     <div class="container" x-data="leaderboardApp()">
-        <header>
-            <h1>🥊 Fights in Tight Spaces</h1>
-            <p>Daily Challenge Leaderboard</p>
-        </header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark rounded mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="frontend/assets/logo.svg" alt="logo" width="36" height="36" class="me-2">
+                    <span>FITS Leaderboard</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Docs</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="hero mb-3" style="background-image: url('frontend/assets/hero.svg');">
+            <div class="container py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-5">🥊 Fights in Tight Spaces</h1>
+                        <p class="lead text-muted">Daily Challenge Leaderboard</p>
+                    </div>
+                    <div class="col-md-4 text-md-end d-none d-md-block">
+                        <img src="frontend/assets/hero-logo.svg" alt="" class="img-fluid" style="max-height:80px">
+                    </div>
+                </div>
+            </div>
+        </div>
         
         <div class="tabs">
             <button @click="viewMode = 'daily'" :class="{'active': viewMode === 'daily'}">
@@ -199,85 +232,94 @@
             </button>
         </div>
         
-        <div class="controls" x-show="viewMode === 'daily'">
-            <div>
-                <label for="date-select">Date:</label>
-                <input type="date" 
-                       id="date-select" 
-                       x-model="selectedDate"
-                       :max="today">
-            </div>
-            
-            <button @click="loadLeaderboard()" :disabled="loading">
-                <span x-show="!loading">Load Leaderboard</span>
-                <span x-show="loading">Loading...</span>
-            </button>
-            
-            <div class="status" 
-                 x-show="status"
-                 :class="statusType"
-                 x-text="status">
-            </div>
-        </div>
-        
-        <div class="controls" x-show="viewMode === 'weekly'">
-            <div>
-                <label for="week-select">Week:</label>
-                <select id="week-select" x-model="selectedWeek" @change="loadWeekly()">
-                    <template x-for="week in availableWeeks" :key="week.week_start">
-                        <option :value="week.week_start" x-text="week.week_start + ' to ' + week.week_end + ' (' + week.player_count + ' players)'"></option>
-                    </template>
-                </select>
-            </div>
-            
-            <button @click="loadWeekly()" :disabled="loading">
-                <span x-show="!loading">Refresh</span>
-                <span x-show="loading">Loading...</span>
-            </button>
-            
-            <div class="status" 
-                 x-show="status"
-                 :class="statusType"
-                 x-text="status">
+        <div class="card mb-3" x-show="viewMode === 'daily'">
+            <div class="card-body controls">
+                <form class="row g-2 align-items-center">
+                    <div class="col-auto">
+                        <label for="date-select" class="form-label mb-0">Date</label>
+                        <input type="date" id="date-select" x-model="selectedDate" :max="today" class="form-control">
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label mb-0" aria-hidden="true">&nbsp;</label>
+                        <button class="btn btn-success" @click.prevent="loadLeaderboard()" :disabled="loading">
+                            <span x-show="!loading">Load</span>
+                            <span x-show="loading">Loading...</span>
+                        </button>
+                    </div>
+                    <div class="col-auto ms-auto">
+                        <div class="status" x-show="status" :class="statusType" x-text="status"></div>
+                    </div>
+                </form>
             </div>
         </div>
         
-        <div class="controls" x-show="viewMode === 'monthly'">
-            <div>
-                <label for="month-select">Month:</label>
-                <select id="month-select" x-model="selectedMonth" @change="loadMonthly()">
-                    <template x-for="month in availableMonths" :key="month.month_start">
-                        <option :value="month.month_start.substring(0, 7)" x-text="formatMonthName(month.month_start) + ' (' + month.player_count + ' players)'"></option>
-                    </template>
-                </select>
-            </div>
-            
-            <button @click="loadMonthly()" :disabled="loading">
-                <span x-show="!loading">Refresh</span>
-                <span x-show="loading">Loading...</span>
-            </button>
-            
-            <div class="status" 
-                 x-show="status"
-                 :class="statusType"
-                 x-text="status">
-            </div>
-        </div>
-        
-        <div class="controls" x-show="viewMode === 'alltime'">
-            <button @click="loadAllTime()" :disabled="loading">
-                <span x-show="!loading">Refresh All-Time Stats</span>
-                <span x-show="loading">Loading...</span>
-            </button>
-            
-            <div class="status" 
-                 x-show="status"
-                 :class="statusType"
-                 x-text="status">
+        <div class="card mb-3" x-show="viewMode === 'weekly'">
+            <div class="card-body controls">
+                <form class="row g-2 align-items-center">
+                    <div class="col-auto">
+                        <label for="week-select" class="form-label mb-0">Week</label>
+                        <select id="week-select" x-model="selectedWeek" @change="loadWeekly()" class="form-select">
+                            <template x-for="week in availableWeeks" :key="week.week_start">
+                                <option :value="week.week_start" x-text="week.week_start + ' to ' + week.week_end + ' (' + week.player_count + ' players)'"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label mb-0" aria-hidden="true">&nbsp;</label>
+                        <button class="btn btn-primary" @click.prevent="loadWeekly()" :disabled="loading">
+                            <span x-show="!loading">Refresh</span>
+                            <span x-show="loading">Loading...</span>
+                        </button>
+                    </div>
+                    <div class="col-auto ms-auto">
+                        <div class="status" x-show="status" :class="statusType" x-text="status"></div>
+                    </div>
+                </form>
             </div>
         </div>
         
-        <div id="leaderboard-table"></div>
+        <div class="card mb-3" x-show="viewMode === 'monthly'">
+            <div class="card-body controls">
+                <form class="row g-2 align-items-center">
+                    <div class="col-auto">
+                        <label for="month-select" class="form-label mb-0">Month</label>
+                        <select id="month-select" x-model="selectedMonth" @change="loadMonthly()" class="form-select">
+                            <template x-for="month in availableMonths" :key="month.month_start">
+                                <option :value="month.month_start.substring(0, 7)" x-text="formatMonthName(month.month_start) + ' (' + month.player_count + ' players)'"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label mb-0" aria-hidden="true">&nbsp;</label>
+                        <button class="btn btn-primary" @click.prevent="loadMonthly()" :disabled="loading">
+                            <span x-show="!loading">Refresh</span>
+                            <span x-show="loading">Loading...</span>
+                        </button>
+                    </div>
+                    <div class="col-auto ms-auto">
+                        <div class="status" x-show="status" :class="statusType" x-text="status"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mb-3" x-show="viewMode === 'alltime'">
+            <div class="card-body controls">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-success me-3" @click.prevent="loadAllTime()" :disabled="loading">
+                        <span x-show="!loading">Refresh All-Time Stats</span>
+                        <span x-show="loading">Loading...</span>
+                    </button>
+                    <div class="status" x-show="status" :class="statusType" x-text="status"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card table-card mb-4">
+            <div class="card-body p-2">
+                <div id="leaderboard-table"></div>
+            </div>
+        </div>
         
         <footer>
             <p>Unofficial community tool • Not affiliated with Ground Shatter</p>
@@ -287,6 +329,8 @@
     
     <!-- Tabulator JS -->
     <script src="https://unpkg.com/tabulator-tables@5.5/dist/js/tabulator.min.js"></script>
+    <!-- Bootstrap Bundle JS (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-TQ3r8Dk+Y9Qb2a2m5zY9lK9f0Y1y6k1b2VQ1x6y1z9VQ1x6y1z9VQ1x6y1z9VQ" crossorigin="anonymous"></script>
     
     <script>
         function leaderboardApp() {
@@ -483,6 +527,7 @@
                                 { title: "Best Daily", field: "best_daily_score", sorter: "number" },
                                 { title: "Best Date", field: "best_daily_date", width: 110 },
                                 { title: "Platform", field: "platform", width: 120 },
+                                { title: "First Seen", field: "first_seen", width: 110 },
                             ]);
                             
                             this.table.setData(data.data);

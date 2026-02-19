@@ -1,0 +1,58 @@
+/* Minimal custom theme to pair with Bootstrap
+   Lightweight overrides: spacing, hero slot, card tweaks, dark-mode helpers
+*/
+:root{
+  --accent:#4CAF50;
+  --bg-1:#11121a;
+  --bg-2:#1e1f2a;
+  --muted:#a8a8b3;
+}
+
+body{
+  background: linear-gradient(135deg,var(--bg-1) 0%, var(--bg-2) 100%);
+  color: #e6e6e9;
+}
+
+/* Hero / banner placeholder */
+.hero{
+  background-size: cover;
+  background-position: center;
+  border-radius: .5rem;
+  padding: 1.5rem;
+  color: #fff;
+}
+
+.hero .display-5{font-weight:700}
+
+/* Navbar tweaks */
+.navbar-brand img{border-radius:6px}
+
+/* Card wrapper for the table */
+.table-card{
+  background: rgba(15,16,20,0.6);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: .5rem;
+  padding: .5rem;
+}
+
+/* Controls spacing */
+.controls .form-control,
+.controls .btn{
+  min-height: 44px;
+}
+
+/* Small responsive tweaks */
+@media (max-width: 768px){
+  .tabs button{font-size: .95rem}
+}
+
+/* Tabulator tweaks to look integrated with bootstrap */
+.tabulator{
+  background: transparent;
+}
+
+/* First-seen column date style */
+.tabulator-cell[data-field="first_seen"]{
+  font-size: .95rem;
+  color: var(--muted);
+}

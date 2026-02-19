@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 200 80">
+  <rect width="200" height="80" rx="10" fill="#15161c"/>
+  <circle cx="40" cy="40" r="20" fill="#4CAF50"/>
+  <text x="74" y="48" fill="#e6e6e9" font-family="Segoe UI, Tahoma" font-size="18">FITS</text>
+</svg>
