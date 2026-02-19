@@ -7,6 +7,9 @@
 #data/*.db-shm
 #data/*.db-wal
 
+# Backup folder for database snapshots
+data/db_backups/
+
 # Ignore log files
 data/*.log
 
