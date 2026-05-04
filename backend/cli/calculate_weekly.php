@@ -26,6 +26,8 @@ if (isset($options['help'])) {
 try {
     $db = new PDO('sqlite:' . DB_PATH);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Give SQLite time to wait for transient write locks.
+    $db->exec('PRAGMA busy_timeout = 10000');
 } catch (Exception $e) {
     echo "Database error: {$e->getMessage()}\n";
     exit(1);
